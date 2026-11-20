@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useCart } from "../context/CartContext"; // 1. Import Cart Context
+import { formatRupiah } from "../api"
 
 export default function MerchDetailModal({ merch, onClose }) {
     const [quantity, setQuantity] = useState(1);
@@ -37,7 +38,11 @@ export default function MerchDetailModal({ merch, onClose }) {
                             className="w-full h-full object-cover hidden"
                             onLoad={(e) => e.currentTarget.classList.remove('hidden')}
                         />
-                        <span className="text-gray-400 text-xs">[ Product Preview ]</span>
+                        {merch.image ? (
+                            <img src={merch.image} alt={merch.title} className="w-full h-full object-cover" />
+                        ) : (
+                            <span className="text-gray-400 text-[10px] md:text-xs">[ Product Preview ]</span>
+                        )}
                     </div>
 
                     <div className="flex flex-col justify-between space-y-4">
@@ -49,7 +54,7 @@ export default function MerchDetailModal({ merch, onClose }) {
                                 {merch.title}
                             </h2>
                             <p className="text-lg font-extrabold text-[#6B7CB4] mt-2">
-                                {merch.price}
+                                {formatRupiah(merch.price)}
                             </p>
                             <p className="text-gray-500 text-xs sm:text-sm mt-3 leading-relaxed">
                                 {merch.description || "Official merchandise item crafted with high-quality materials. Perfect for collectors and fans."}

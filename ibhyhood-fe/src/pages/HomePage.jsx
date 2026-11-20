@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { api } from "../api"
 
 // Assets
 import bgHome from "../assets/images/bg-home.png";
@@ -62,14 +63,7 @@ export default function HomePage() {
 
     // Mengambil data schedule dari localStorage saat component dipasang
     useEffect(() => {
-        const savedSchedules = localStorage.getItem("ibhy_schedules");
-        if (savedSchedules) {
-            try {
-                setSchedules(JSON.parse(savedSchedules));
-            } catch (err) {
-                console.error("Gagal membaca schedule dari LocalStorage:", err);
-            }
-        }
+        api("/schedules").then(setSchedules).catch(console.error);
     }, []);
 
     return (

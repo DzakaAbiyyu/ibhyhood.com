@@ -1,9 +1,20 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Navbar from "../components/Navbar";
-import { FEATURED_PROMO, MERCH_FILTERS, MERCH_ITEMS } from "../data/merchData";
+import { api, formatRupiah } from "../api";
 import Footer from "../components/Footer";
 import MerchDetailModal from "../components/MerchDetailModal";
 import { useCart } from "../context/CartContext";
+
+const mapMerch = (m) => ({
+    id: m.id,
+    title: m.title,
+    type: m.type,
+    theme: m.theme,
+    badge: m.badge,
+    description: m.description,
+    image: m.image_url,
+    price: m.price,
+});
 
 export default function MerchPage() {
     const [selectedTypes, setSelectedTypes] = useState([]);
@@ -14,6 +25,22 @@ export default function MerchPage() {
     // Context Keranjang Belanja
     const { getTotalCount, setIsCartOpen } = useCart();
     const cartCount = getTotalCount();
+
+    const [merchItems, setMerchItems] = useState([]);
+    const [filters, setFilters] = useState({ type: [], theme: [] });
+    const [promo, setPromo] = useState(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        Promise.all([api("/merch"), api("/merch-filters"), api("/promo")])
+            .then(([items, fl, pr]) => {
+                setMerchItems(items.map(mapMerch));
+                setFilters(fl);
+                setPromo(pr);
+            })
+            .catch(console.error)
+            .finally(() => setLoading(false));
+    }, []);
 
     const toggleTypeFilter = (type) => {
         setSelectedTypes((prev) =>
@@ -27,7 +54,7 @@ export default function MerchPage() {
         );
     };
 
-    const filteredProducts = MERCH_ITEMS.filter((item) => {
+    const filteredProducts = merchItems.filter((item) => {
         const matchesType =
             selectedTypes.length === 0 || selectedTypes.includes(item.type);
         const matchesTheme =
@@ -84,14 +111,14 @@ export default function MerchPage() {
                             Limited Drop
                         </span>
                         <h2 className="text-xl md:text-3xl font-extrabold tracking-tight leading-snug">
-                            {FEATURED_PROMO.title}
+                            {promo?.title}
                         </h2>
                         <p className="text-white/80 text-xs md:text-sm">
-                            {FEATURED_PROMO.subtitle}
+                            {promo?.subtitle}
                         </p>
                         <div className="flex items-center gap-3 pt-2">
                             <span className="font-mono bg-black/20 px-3 py-1.5 rounded-md text-xs md:text-sm font-semibold">
-                                ⏳ {FEATURED_PROMO.timer}
+                                ⏳ --
                             </span>
                             <button className="bg-white text-[#6B7CB4] hover:bg-opacity-90 font-semibold px-4 py-1.5 rounded-lg text-xs md:text-sm transition-all">
                                 Shop Drop
@@ -149,7 +176,7 @@ export default function MerchPage() {
                                 Merch Type
                             </h3>
                             <div className="space-y-2">
-                                {MERCH_FILTERS.type.map((type) => (
+                                {filters.type.map((type) => (
                                     <label
                                         key={type}
                                         className="flex items-center gap-2 text-xs md:text-sm text-gray-600 cursor-pointer"
@@ -172,7 +199,7 @@ export default function MerchPage() {
                                 Theme
                             </h3>
                             <div className="space-y-2">
-                                {MERCH_FILTERS.theme.map((theme) => (
+                                {filters.theme.map((theme) => (
                                     <label
                                         key={theme}
                                         className="flex items-center gap-2 text-xs md:text-sm text-gray-600 cursor-pointer"
@@ -236,7 +263,7 @@ export default function MerchPage() {
 
                                             <div className="pt-2 border-t flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                                                 <span className="font-bold text-xs md:text-sm text-gray-900">
-                                                    {item.price}
+                                                    {formatRupiah(item.price)}
                                                 </span>
                                                 <button
                                                     onClick={(e) => {

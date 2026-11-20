@@ -1,9 +1,20 @@
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import heroVume from "../assets/images/hero-vume.png";
-import { VUME_DATA } from "../data/vumeData";
+import { api } from "../api";
+
+import { useState, useEffect } from "react";
 
 export default function VumePage() {
+    const [vumeItems, setVumeItems] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        api("/vume")
+            .then(setVumeItems)
+            .catch(console.error)
+            .finally(() => setLoading(false));
+    }, []);
     return (
         <main className="min-h-screen flex flex-col bg-white">
             <Navbar />
@@ -25,10 +36,13 @@ export default function VumePage() {
                         OUR BESTSELLERS
                     </h2>
                 </div>
+                {loading && (
+                    <p className="text-center text-sm text-gray-400 mt-10">Memuat...</p>
+                )}
 
                 {/* Dynamic List Parfum */}
                 <div className="space-y-12 mt-10 sm:mt-16">
-                    {VUME_DATA.map((item, index) => (
+                    {vumeItems.map((item, index) => (
                         <div key={item.id}>
                             <div
                                 className={`mx-auto flex flex-col ${index % 2 === 1 ? "md:flex-row-reverse" : "md:flex-row"
@@ -36,9 +50,9 @@ export default function VumePage() {
                             >
                                 {/* Container Gambar Parfum (Tanpa Background Warna) */}
                                 <div className="h-64 w-64 sm:h-72 sm:w-72 shrink-0 overflow-hidden flex items-center justify-center p-2">
-                                    {item.image ? (
+                                    {item.image_url ? (
                                         <img
-                                            src={item.image}
+                                            src={item.image_url}
                                             alt={item.title}
                                             className="w-full h-full object-contain"
                                         />

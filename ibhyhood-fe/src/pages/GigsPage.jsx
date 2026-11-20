@@ -1,12 +1,38 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { GIGS_DATA } from "../data/gigsData";
+import { api, formatRupiah } from "../api";
 import GigDetailModal from "../components/GigDetailModal";
 import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
 
+const mapGig = (g) => ({
+    id: g.id,
+    title: g.title,
+    description: g.description,
+    startingPrice: formatRupiah(g.starting_price),
+    coverImage: g.cover_image_url,
+    gallery: g.gallery_urls || [],
+    packages: Object.fromEntries(
+        (g.packages || []).map((p) => [
+            p.tier,
+            { price: formatRupiah(p.price), desc: p.description },
+        ])
+    ),
+});
+
 export default function GigsPage() {
+    const [gigs, setGigs] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [selectedGig, setSelectedGig] = useState(null);
+
+    useEffect(() => {
+        api("/gigs")
+            .then((data) => setGigs(data.map(mapGig)))
+            .catch(console.error)
+            .finally(() => setLoading(false));
+    }, []);
+
+
 
     return (
         <div className="min-h-screen flex flex-col bg-white">
@@ -24,11 +50,11 @@ export default function GigsPage() {
                     With our services: illustrations, logos, design, and more. Affordable. Fast. Professional.
                 </p>
             </section>
-
+            {loading && <p className="text-sm text-gray-400">Memuat...</p>}
             {/* Catalog Grid */}
             <main className="px-8 pb-16 flex-1">
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-                    {GIGS_DATA.map((gig) => (
+                    {gigs.map((gig) => (
                         <div
                             key={gig.id}
                             onClick={() => setSelectedGig(gig)}

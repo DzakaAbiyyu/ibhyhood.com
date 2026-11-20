@@ -48,11 +48,9 @@ export default function GigDetailModal({ gig, onClose }) {
                     {/* Main Image & Mini Gallery */}
                     <div className="md:col-span-2 space-y-3">
                         <div className="h-48 sm:h-64 w-full bg-gray-200 rounded-xl overflow-hidden">
-                            <img
-                                src={gig.coverImage}
-                                alt={gig.title}
-                                className="w-full h-full object-cover"
-                            />
+                            {gig.coverImage && (
+                                <img src={gig.coverImage} alt={gig.title} className="w-full h-full object-cover" />
+                            )}
                         </div>
                         <div className="grid grid-cols-4 gap-2">
                             {(gig.gallery && gig.gallery.length > 0 ? gig.gallery : [1, 2, 3, 4]).map((img, idx) => (
